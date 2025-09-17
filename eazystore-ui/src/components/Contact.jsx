@@ -1,7 +1,6 @@
 import React from "react";
 import PageTitle from "./PageTitle";
 import { Form } from "react-router-dom";
-import apiClient from "../api/apiClient";
 import {
   useActionData,
   useNavigation,
@@ -182,44 +181,4 @@ export default function Contact() {
       </div>
     </div>
   );
-}
-
-export async function contactAction({ request, params }) {
-  const data = await request.formData();
-
-  const contactData = {
-    name: data.get("name"),
-    email: data.get("email"),
-    mobileNumber: data.get("mobileNumber"),
-    message: data.get("message"),
-  };
-  try {
-    await apiClient.post("/contacts", contactData);
-    return { success: true };
-    // return redirect("/home");
-  } catch (error) {
-    if (error.response?.status === 400) {
-      return { success: false, errors: error.response?.data };
-    }
-    throw new Response(
-      error.response?.data?.errorMessage ||
-        error.message ||
-        "Failed to submit your message. Please try again.",
-      { status: error.status || 500 }
-    );
-  }
-}
-
-export async function contactLoader() {
-  try {
-    const response = await apiClient.get("/contacts"); // Axios GET Request
-    return response.data;
-  } catch (error) {
-    throw new Response(
-      error.response?.data?.errorMessage ||
-        error.message ||
-        "Failed to fetch profile details. Please try again.",
-      { status: error.status || 500 }
-    );
-  }
 }

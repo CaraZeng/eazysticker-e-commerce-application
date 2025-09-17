@@ -1,24 +1,18 @@
 import React from "react";
-import { useLoaderData, useRevalidator } from "react-router-dom";
+import { useLoaderData, useRevalidator, redirect } from "react-router-dom";
 import PageTitle from "../PageTitle";
-import apiClient from "../../api/apiClient";
 import { toast } from "react-toastify";
 
 export default function Messages() {
   const messages = useLoaderData();
   const revalidator = useRevalidator();
 
-  /**
-   * Handle Order Cancellation
-   */
-  const handleCloseMessage = async (contactId) => {
-    try {
-      await apiClient.patch(`/admin/messages/${contactId}/close`);
-      toast.success("Message closed");
-      revalidator.revalidate(); // 🔁 Re-run loader
-    } catch (error) {
-      toast.error("Failed to close message");
-    }
+  const handleCloseMessage = (contactId) => {
+    const saved = JSON.parse(localStorage.getItem("adminMessages") || "[]");
+    const updated = saved.filter((msg) => msg.contactId !== contactId);
+    localStorage.setItem("adminMessages", JSON.stringify(updated));
+    toast.success("Message closed");
+    revalidator.revalidate();
   };
 
   return (
@@ -33,38 +27,22 @@ export default function Messages() {
           <table className="w-full mt-4 table-fixed border-collapse border border-gray-200 dark:border-gray-700">
             <thead>
               <tr className="bg-primary dark:bg-light text-lighter dark:text-primary">
-                <th className="w-1/6 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-                  Name
-                </th>
-                <th className="w-1/6 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-                  Email
-                </th>
-                <th className="w-1/6 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-                  Mobile #
-                </th>
-                <th className="w-2/5 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-                  Message
-                </th>
-                <th className="w-1/6 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-                  Action
-                </th>
+                <th className="w-1/6 border px-4 py-2 text-left">Name</th>
+                <th className="w-1/6 border px-4 py-2 text-left">Email</th>
+                <th className="w-1/6 border px-4 py-2 text-left">Mobile #</th>
+                <th className="w-2/5 border px-4 py-2 text-left">Message</th>
+                <th className="w-1/6 border px-4 py-2 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
               {messages.map((message) => (
                 <tr
                   key={message.contactId}
-                  className=" bg-white dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-lighter"
+                  className="bg-white dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-lighter"
                 >
-                  <td className="border px-4 py-2 break-words">
-                    {message.name}
-                  </td>
-                  <td className="border px-4 py-2 break-words">
-                    {message.email}
-                  </td>
-                  <td className="border px-4 py-2 break-words">
-                    {message.mobileNumber}
-                  </td>
+                  <td className="border px-4 py-2 break-words">{message.name}</td>
+                  <td className="border px-4 py-2 break-words">{message.email}</td>
+                  <td className="border px-4 py-2 break-words">{message.mobileNumber}</td>
                   <td className="border px-4 py-2 break-words max-w-[300px] overflow-auto">
                     {message.message}
                   </td>
@@ -87,15 +65,33 @@ export default function Messages() {
 }
 
 export async function messagesLoader() {
-  try {
-    const response = await apiClient.get("/admin/messages"); // Axios GET Request
-    return response.data;
-  } catch (error) {
-    throw new Response(
-      error.response?.data?.errorMessage ||
-        error.message ||
-        "Failed to fetch messages. Please try again.",
-      { status: error.status || 500 }
-    );
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || user.role !== "admin") {
+    throw redirect("/login");
   }
+
+  // 初始化模拟消息
+  let messages = JSON.parse(localStorage.getItem("adminMessages") || "[]");
+
+  if (messages.length === 0) {
+    messages = [
+      {
+        contactId: "msg001",
+        name: "Alice Zhang",
+        email: "alice@example.com",
+        mobileNumber: "1234567890",
+        message: "I want to inquire about bulk orders. Please call me.",
+      },
+      {
+        contactId: "msg002",
+        name: "Bob Lee",
+        email: "bob@example.com",
+        mobileNumber: "0987654321",
+        message: "My payment didn't go through, can you help?",
+      },
+    ];
+    localStorage.setItem("adminMessages", JSON.stringify(messages));
+  }
+
+  return messages;
 }

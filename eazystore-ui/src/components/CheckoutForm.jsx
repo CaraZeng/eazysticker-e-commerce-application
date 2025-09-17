@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { selectUser } from "../store/auth-slice";
-import apiClient from "../api/apiClient";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCartItems,
@@ -14,7 +13,7 @@ import {
   CardExpiryElement,
   CardCvcElement,
 } from "@stripe/react-stripe-js";
-import { useNavigate, useNavigation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PageTitle from "./PageTitle";
 import { toast } from "react-toastify";
 
@@ -40,15 +39,11 @@ export default function CheckoutForm() {
     "block text-lg font-semibold text-primary dark:text-light mb-2";
   const fieldBaseClass =
     "w-full px-4 py-2 text-base border rounded-md transition border-primary dark:border-light focus:ring focus:ring-dark dark:focus:ring-lighter focus:outline-none text-gray-800 dark:text-lighter bg-white dark:bg-gray-600 placeholder-gray-400 dark:placeholder-gray-300";
-  const fieldErrorClass =
-    "border-red-400 dark:border-red-500 focus:ring-red-500";
-  const fieldValidClass =
-    "border-primary dark:border-light focus:ring-dark dark:focus:ring-lighter";
+  const fieldErrorClass = "border-red-400 dark:border-red-500 focus:ring-red-500";
+  const fieldValidClass = "border-primary dark:border-light focus:ring-dark dark:focus:ring-lighter";
 
   const getClassForElement = (field) =>
-    `${fieldBaseClass} ${
-      elementErrors[field] ? fieldErrorClass : fieldValidClass
-    }`;
+    `${fieldBaseClass} ${elementErrors[field] ? fieldErrorClass : fieldValidClass}`;
 
   const elementOptions = {
     style: {
@@ -86,64 +81,27 @@ export default function CheckoutForm() {
 
     setIsProcessing(true);
 
-    try {
-      const response = await apiClient.post("/payment/create-payment-intent", {
-        amount: totalPrice * 100,
-        currency: "usd",
-      });
+    // 模拟支付和订单创建（无后端）
+    setTimeout(() => {
+      toast.success("Payment successful!");
 
-      const { clientSecret } = response.data;
+      const fakeOrder = {
+        totalPrice,
+        paymentId: "simulated-payment-id",
+        paymentStatus: "succeeded",
+        items: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      };
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
-          payment_method: {
-            card: elements.getElement(CardNumberElement),
-            billing_details: {
-              name: user.name,
-              email: user.email,
-              phone: user.mobileNumber,
-              address: {
-                line1: user.street,
-                city: user.city,
-                state: user.state,
-                postal_code: user.postalCode,
-                country: user.country,
-              },
-            },
-          },
-        }
-      );
+      console.log("🧾 Fake order submitted:", fakeOrder);
 
-      if (error) {
-        setErrorMessage(error.message || "Payment failed. Please try again.");
-      } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        toast.success("Payment successful!");
-        try {
-          await apiClient.post("/orders", {
-            totalPrice: totalPrice,
-            paymentId: paymentIntent.id,
-            paymentStatus: paymentIntent.status,
-            items: cart.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          });
-          sessionStorage.setItem("skipRedirectPath", "true");
-          dispatch(clearCart());
-          navigate("/order-success");
-        } catch (orderError) {
-          console.error("Failed to create order:", orderError);
-          setErrorMessage("Order creation failed. Please contact support.");
-        }
-      }
-    } catch (error) {
-      setErrorMessage("Error processing payment. Please try again later.");
-      console.error("Error creating PaymentIntent:", error);
-    } finally {
-      setIsProcessing(false);
-    }
+      dispatch(clearCart());
+      sessionStorage.setItem("skipRedirectPath", "true");
+      navigate("/order-success");
+    }, 2000);
   };
 
   return (
@@ -151,7 +109,7 @@ export default function CheckoutForm() {
       <div
         className={
           isProcessing
-            ? "visible  flex flex-col justify-center items-center my-[200px] "
+            ? "visible flex flex-col justify-center items-center my-[200px]"
             : "hidden"
         }
       >
@@ -167,18 +125,14 @@ export default function CheckoutForm() {
         }
       >
         <PageTitle title="Complete Your Payment" />
-
         <p className="text-center mt-8 text-lg text-gray-600 dark:text-lighter mb-8">
           Amount to be charged: <strong>${totalPrice.toFixed(2)}</strong>
         </p>
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {errorMessage && (
-            <div className="text-red-500 text-sm text-center">
-              {errorMessage}
-            </div>
+            <div className="text-red-500 text-sm text-center">{errorMessage}</div>
           )}
-          {/* Card Number */}
+
           <div>
             <label htmlFor="cardNumber" className={labelStyle}>
               Card Number
@@ -190,13 +144,10 @@ export default function CheckoutForm() {
               />
             </div>
             {elementErrors.cardNumber && (
-              <p className="text-red-500 text-sm mt-1">
-                {elementErrors.cardNumber}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{elementErrors.cardNumber}</p>
             )}
           </div>
 
-          {/* Card Expiry */}
           <div>
             <label htmlFor="cardExpiry" className={labelStyle}>
               Expiry Date
@@ -208,13 +159,10 @@ export default function CheckoutForm() {
               />
             </div>
             {elementErrors.cardExpiry && (
-              <p className="text-red-500 text-sm mt-1">
-                {elementErrors.cardExpiry}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{elementErrors.cardExpiry}</p>
             )}
           </div>
 
-          {/* Card CVC */}
           <div>
             <label htmlFor="cardCvc" className={labelStyle}>
               CVC
@@ -226,13 +174,10 @@ export default function CheckoutForm() {
               />
             </div>
             {elementErrors.cardCvc && (
-              <p className="text-red-500 text-sm mt-1">
-                {elementErrors.cardCvc}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{elementErrors.cardCvc}</p>
             )}
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"

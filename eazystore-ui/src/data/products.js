@@ -271,3 +271,5 @@ export const products = [
     "createdAt": "2025-09-17T03:59:49Z"
   }
 ];
+
+export default products;

@@ -1,7 +1,6 @@
 import React from "react";
-import { useLoaderData, useRevalidator } from "react-router-dom";
+import { useLoaderData, useRevalidator, redirect } from "react-router-dom";
 import PageTitle from "../PageTitle";
-import apiClient from "../../api/apiClient";
 import { toast } from "react-toastify";
 
 export default function AdminOrders() {
@@ -17,36 +16,30 @@ export default function AdminOrders() {
     });
   }
 
-  /**
-   * Handle Order Confirm
-   */
   const handleConfirm = async (orderId) => {
-    try {
-      await apiClient.patch(`/admin/orders/${orderId}/confirm`);
-      toast.success("Order confirmed.");
-      revalidator.revalidate(); // 🔁 Re-run loader
-    } catch (error) {
-      toast.error("Failed to confirm order.");
-    }
+    const orders = JSON.parse(localStorage.getItem("adminOrders") || "[]");
+    const updated = orders.map((order) =>
+      order.orderId === orderId ? { ...order, status: "Confirmed" } : order
+    );
+    localStorage.setItem("adminOrders", JSON.stringify(updated));
+    toast.success("Order confirmed.");
+    revalidator.revalidate();
   };
 
-  /**
-   * Handle Order Cancellation
-   */
   const handleCancel = async (orderId) => {
-    try {
-      await apiClient.patch(`/admin/orders/${orderId}/cancel`);
-      toast.success("Order cancelled.");
-      revalidator.revalidate(); // 🔁 Re-run loader
-    } catch (error) {
-      toast.error("Failed to cancel order.");
-    }
+    const orders = JSON.parse(localStorage.getItem("adminOrders") || "[]");
+    const updated = orders.map((order) =>
+      order.orderId === orderId ? { ...order, status: "Cancelled" } : order
+    );
+    localStorage.setItem("adminOrders", JSON.stringify(updated));
+    toast.success("Order cancelled.");
+    revalidator.revalidate();
   };
 
   return (
     <div className="min-h-[852px] container mx-auto px-6 py-12 font-primary dark:bg-darkbg">
       {orders.length === 0 ? (
-        <p className="text-center text-2xl  text-primary dark:text-lighter">
+        <p className="text-center text-2xl text-primary dark:text-lighter">
           No orders found.
         </p>
       ) : (
@@ -57,7 +50,6 @@ export default function AdminOrders() {
               key={order.orderId}
               className="bg-white dark:bg-gray-700 shadow-md rounded-md p-6"
             >
-              {/* Top Row: Order Info + Buttons */}
               <div className="flex flex-wrap items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-semibold text-primary dark:text-lighter">
@@ -83,7 +75,6 @@ export default function AdminOrders() {
                   </p>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex space-x-4 mt-4 lg:mt-0">
                   <button
                     onClick={() => handleConfirm(order.orderId)}
@@ -100,7 +91,6 @@ export default function AdminOrders() {
                 </div>
               </div>
 
-              {/* Order Items */}
               <div className="space-y-4 border-t pt-4">
                 {order.items.map((item, index) => (
                   <div
@@ -134,16 +124,54 @@ export default function AdminOrders() {
   );
 }
 
+// 模拟加载订单列表（从 localStorage）
 export async function adminOrdersLoader() {
-  try {
-    const response = await apiClient.get("/admin/orders"); // Axios GET Request
-    return response.data;
-  } catch (error) {
-    throw new Response(
-      error.response?.data?.errorMessage ||
-        error.message ||
-        "Failed to fetch orders. Please try again.",
-      { status: error.status || 500 }
-    );
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || user.role !== "admin") {
+    throw redirect("/login");
   }
+
+  // 初始化模拟数据
+  let existing = JSON.parse(localStorage.getItem("adminOrders") || "[]");
+  if (existing.length === 0) {
+    existing = [
+      {
+        orderId: "A123",
+        status: "Pending",
+        totalPrice: 59.99,
+        createdAt: "2025-09-12T10:30:00Z",
+        items: [
+          {
+            productName: "Sticker Pack A",
+            quantity: 2,
+            price: 9.99,
+            imageUrl: "https://via.placeholder.com/64?text=A",
+          },
+          {
+            productName: "Sticker Pack B",
+            quantity: 1,
+            price: 39.99,
+            imageUrl: "https://via.placeholder.com/64?text=B",
+          },
+        ],
+      },
+      {
+        orderId: "B456",
+        status: "Pending",
+        totalPrice: 19.99,
+        createdAt: "2025-09-13T15:00:00Z",
+        items: [
+          {
+            productName: "Sticker Pack C",
+            quantity: 1,
+            price: 19.99,
+            imageUrl: "https://via.placeholder.com/64?text=C",
+          },
+        ],
+      },
+    ];
+    localStorage.setItem("adminOrders", JSON.stringify(existing));
+  }
+
+  return existing;
 }

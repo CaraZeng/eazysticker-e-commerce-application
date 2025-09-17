@@ -29,3 +29,9 @@ const authSlice = createSlice({
 
 export const { loginSuccess, logout } = authSlice.actions;
 export default authSlice.reducer;
+
+// Selector: 获取 user 对象
+export const selectUser = (state) => state.auth.user;
+
+// Selector: 判断是否已登录
+export const selectIsAuthenticated = (state) => !!state.auth.user;

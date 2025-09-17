@@ -1,6 +1,5 @@
 import React from "react";
-import apiClient from "../api/apiClient";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, redirect } from "react-router-dom";
 import PageTitle from "./PageTitle";
 
 export default function Orders() {
@@ -14,10 +13,11 @@ export default function Orders() {
       day: "numeric",
     });
   }
+
   return (
     <div className="min-h-[852px] container mx-auto px-6 py-12 font-primary dark:bg-darkbg">
       {orders.length === 0 ? (
-        <p className="text-center text-2xl  text-primary dark:text-lighter">
+        <p className="text-center text-2xl text-primary dark:text-lighter">
           No orders found.
         </p>
       ) : (
@@ -80,16 +80,49 @@ export default function Orders() {
   );
 }
 
+// 模拟前端-only加载订单数据
 export async function ordersLoader() {
-  try {
-    const response = await apiClient.get("/orders"); // Axios GET Request
-    return response.data;
-  } catch (error) {
-    throw new Response(
-      error.response?.data?.errorMessage ||
-        error.message ||
-        "Failed to fetch orders. Please try again.",
-      { status: error.status || 500 }
-    );
-  }
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) throw redirect("/login");
+
+  // 模拟订单数据
+  return [
+    {
+      orderId: "A123",
+      status: "Delivered",
+      totalPrice: 49.99,
+      createdAt: "2025-09-14T10:30:00Z",
+      items: [
+        {
+          productName: "Sticker Pack A",
+          quantity: 2,
+          price: 9.99,
+          imageUrl:
+            "https://via.placeholder.com/64?text=A",
+        },
+        {
+          productName: "Sticker Pack B",
+          quantity: 1,
+          price: 29.99,
+          imageUrl:
+            "https://via.placeholder.com/64?text=B",
+        },
+      ],
+    },
+    {
+      orderId: "B456",
+      status: "Processing",
+      totalPrice: 19.99,
+      createdAt: "2025-09-15T14:00:00Z",
+      items: [
+        {
+          productName: "Sticker Pack C",
+          quantity: 1,
+          price: 19.99,
+          imageUrl:
+            "https://via.placeholder.com/64?text=C",
+        },
+      ],
+    },
+  ];
 }
