@@ -18,7 +18,7 @@ export default function Login() {
   const isSubmitting = navigation.state === "submitting";
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const from = sessionStorage.getItem("redirectPath") || "/home";
+  const from = sessionStorage.getItem("redirectPath") || "/";
 
   useEffect(() => {
     if (actionData?.success) {
