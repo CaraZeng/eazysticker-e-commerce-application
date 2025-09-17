@@ -31,4 +31,4 @@ jobs:
           environment_name: Eazystore-backend-env
           region: us-east-2
           version_label: ${{ github.sha }}
-          deployment_package: eazystore/target/*.jar
+          deployment_package: target/*.jar
