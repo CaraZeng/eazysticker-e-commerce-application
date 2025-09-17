@@ -16,7 +16,7 @@ import Login, { loginAction } from "./components/Login.jsx";
 import Cart from "./components/Cart.jsx";
 import Home from "./components/Home.jsx";
 import ErrorPage from "./components/ErrorPage.jsx";
-import { productsLoader } from "./components/Home.jsx";
+// 删除这行：import { productsLoader } from "./components/Home.jsx";
 import { contactAction } from "./components/Contact.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
 import CheckoutForm from "./components/CheckoutForm.jsx";
@@ -43,8 +43,8 @@ const stripePromise = loadStripe(
 
 const routeDefinitions = createRoutesFromElements(
   <Route path="/" element={<App />} errorElement={<ErrorPage />}>
-    <Route index element={<Home />} loader={productsLoader} />
-    <Route path="/home" element={<Home />} loader={productsLoader} />
+    <Route index element={<Home />} />
+    <Route path="/home" element={<Home />} />
     <Route path="/about" element={<About />} />
     <Route
       path="/contact"
