@@ -1,6 +1,8 @@
 package com.eazybytes.eazystore.security;
 
 import com.eazybytes.eazystore.filter.JWTTokenValidatorFilter;
+
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,10 +39,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @RequiredArgsConstructor
 public class EazyStoreSecurityConfig {
 
-    private final List<String> publicPaths;
+    private List<String> publicPaths;
 
     @Value("${eazystore.cors.allowed-origins}")
     private String allowedOrigins;
+    @Value("${eazystore.security.public-paths}")
+    private String publicPathsString;
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
@@ -48,7 +52,7 @@ public class EazyStoreSecurityConfig {
         return http.csrf(csrfConfig -> csrfConfig.disable())
                 .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((requests) -> {
-                            publicPaths.forEach(path ->
+                            this.publicPaths.forEach(path ->
                                     requests.requestMatchers(path).permitAll());
                             requests.requestMatchers("/api/v1/admin/**").hasRole("ADMIN");
                             requests.requestMatchers("/eazystore/actuator/**").hasRole("OPS_ENG");
@@ -60,6 +64,12 @@ public class EazyStoreSecurityConfig {
                 .addFilterBefore(new JWTTokenValidatorFilter(publicPaths), BasicAuthenticationFilter.class)
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults()).build();
+    }
+    @PostConstruct
+    public void initPublicPaths() {
+        this.publicPaths = Arrays.stream(publicPathsString.split(","))
+                .map(String::trim)
+                .toList();
     }
 
 
