@@ -17,7 +17,7 @@ store.subscribe(() => {
 
     // AUTH persistence
     const authState = store.getState().auth;
-    if (authState.isAuthenticated) {
+    if (authState.jwtToken) {
       localStorage.setItem("jwtToken", authState.jwtToken);
       localStorage.setItem("user", JSON.stringify(authState.user));
     } else {

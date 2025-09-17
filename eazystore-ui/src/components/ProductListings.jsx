@@ -2,19 +2,16 @@ import React, { useState, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import SearchBox from "./SearchBox";
 import Dropdown from "./Dropdown";
+import productsData from "../data/products"; // 👉 本地产品数据
 
 const sortList = ["Popularity", "Price Low to High", "Price High to Low"];
 
-export default function ProductListings({ products }) {
+export default function ProductListings() {
   const [searchText, setSearchText] = useState("");
   const [selectedSort, setSelectedSort] = useState("Popularity");
 
   const filteredAndSortedProducts = useMemo(() => {
-    if (!Array.isArray(products)) {
-      return [];
-    }
-
-    let filteredProducts = products.filter(
+    let filteredProducts = productsData.filter(
       (product) =>
         product.name.toLowerCase().includes(searchText.toLowerCase()) ||
         product.description.toLowerCase().includes(searchText.toLowerCase())
@@ -31,15 +28,7 @@ export default function ProductListings({ products }) {
           return parseInt(b.popularity) - parseInt(a.popularity);
       }
     });
-  }, [products, searchText, selectedSort]);
-
-  function handleSearchChange(inputSearch) {
-    setSearchText(inputSearch);
-  }
-
-  function handleSortChange(sortType) {
-    setSelectedSort(sortType);
-  }
+  }, [searchText, selectedSort]);
 
   return (
     <div className="max-w-[1152px] mx-auto">
@@ -48,13 +37,13 @@ export default function ProductListings({ products }) {
           label="Search"
           placeholder="Search products..."
           value={searchText}
-          handleSearch={(value) => handleSearchChange(value)}
+          handleSearch={setSearchText}
         />
         <Dropdown
           label="Sort by"
           options={sortList}
           value={selectedSort}
-          handleSort={(value) => handleSortChange(value)}
+          handleSort={setSelectedSort}
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 py-12">

@@ -1,36 +1,31 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const jwtToken = localStorage.getItem("jwtToken");
-const user = localStorage.getItem("user");
-
-const initialAuthState = {
-  jwtToken: jwtToken || null,
-  user: user ? JSON.parse(user) : null,
-  isAuthenticated: !!(jwtToken && user),
-};
+const initialToken = localStorage.getItem("jwtToken");
+const initialUser = JSON.parse(localStorage.getItem("user"));
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: initialAuthState,
+  initialState: {
+    jwtToken: initialToken || null,
+    user: initialUser || null,
+  },
   reducers: {
-    loginSuccess(state, action) {
+    loginSuccess: (state, action) => {
       const { jwtToken, user } = action.payload;
       state.jwtToken = jwtToken;
       state.user = user;
-      state.isAuthenticated = true;
+
+      localStorage.setItem("jwtToken", jwtToken);
+      localStorage.setItem("user", JSON.stringify(user));
     },
-    logout(state) {
+    logout: (state) => {
       state.jwtToken = null;
       state.user = null;
-      state.isAuthenticated = false;
+      localStorage.removeItem("jwtToken");
+      localStorage.removeItem("user");
     },
   },
 });
 
 export const { loginSuccess, logout } = authSlice.actions;
 export default authSlice.reducer;
-
-// Selectors
-export const selectJwtToken = (state) => state.auth.jwtToken;
-export const selectUser = (state) => state.auth.user;
-export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

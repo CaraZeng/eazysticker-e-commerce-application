@@ -1,25 +1,38 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams, Link, useNavigate } from "react-router-dom";
 import {
   faArrowLeft,
   faShoppingCart,
   faShoppingBasket,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../store/cart-slice";
+import productsData from "../data/products"; // 👈 加载本地 product 数据
 
 export default function ProductDetail() {
+  const { id } = useParams(); // 👈 从 URL 获取产品 ID
   const location = useLocation();
-  const product = location.state?.product;
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [quantity, setQuantity] = useState(1);
   const zoomRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   const [backgroundPosition, setBackgroundPosition] = useState("center");
-  const dispatch = useDispatch();
+
+  // 👇 从 location 或本地产品数据中获取产品
+  const product =
+    location.state?.product ||
+    productsData.find((p) => p.productId === parseInt(id));
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-xl text-red-500">
+        Product not found
+      </div>
+    );
+  }
 
   const handleAddToCart = () => {
     if (quantity < 1) return;
@@ -35,7 +48,6 @@ export default function ProductDetail() {
   };
 
   const handleMouseEnter = () => setIsHovering(true);
-
   const handleMouseLeave = () => {
     setIsHovering(false);
     setBackgroundPosition("center");
@@ -46,7 +58,7 @@ export default function ProductDetail() {
   return (
     <div className="min-h-[852px] flex items-center justify-center px-6 py-8 font-primary bg-normalbg dark:bg-darkbg">
       <div className="max-w-5xl w-full mx-auto flex flex-col md:flex-row md:space-x-8 px-6 p-8">
-        {/* Product Image with Zoom Effect */}
+        {/* Product Image */}
         <div
           ref={zoomRef}
           onMouseMove={isHovering ? handleMouseMove : null}
@@ -89,7 +101,6 @@ export default function ProductDetail() {
           </div>
 
           <div className="flex flex-col space-y-4">
-            {/* Quantity Input */}
             <div className="flex items-center space-x-4">
               <label
                 htmlFor="quantity"
@@ -107,7 +118,6 @@ export default function ProductDetail() {
               />
             </div>
 
-            {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
               className="w-full px-4 py-2 bg-primary dark:bg-light text-white dark:text-black rounded-md text-lg font-semibold hover:bg-dark dark:hover:bg-lighter transition"
@@ -116,7 +126,6 @@ export default function ProductDetail() {
               <FontAwesomeIcon icon={faShoppingCart} className="ml-2" />
             </button>
 
-            {/* View Cart Button */}
             <button
               onClick={handleViewCart}
               className="w-full px-4 py-2 bg-primary dark:bg-light text-white dark:text-black rounded-md text-lg font-semibold hover:bg-dark dark:hover:bg-lighter transition"
