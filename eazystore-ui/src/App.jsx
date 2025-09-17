@@ -1,3 +1,5 @@
+console.log("VITE_API_BASE_URL = ", import.meta.env.VITE_API_BASE_URL);
+
 import Header from "./components/Header";
 import Footer from "./components/footer/Footer";
 import React from "react";
