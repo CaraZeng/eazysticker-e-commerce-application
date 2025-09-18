@@ -15,7 +15,7 @@ export default function About() {
         </span>{" "}
         store is an initiative by{" "}
         <span className="text-lg font-semibold text-primary dark:text-light">
-          Designs by eazybytes
+          Designs by Cara Zeng
         </span>
         , dedicated to offering you the most sought-after stickers and posters!
       </p>

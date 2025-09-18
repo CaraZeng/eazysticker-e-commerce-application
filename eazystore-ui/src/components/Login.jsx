@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../store/auth-slice";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,9 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find((u) => u.email === email && u.password === password);
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
 
     if (user) {
       const fakeToken = "local-token";
@@ -32,12 +35,38 @@ export default function Login() {
       <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg max-w-md w-full px-8 py-6">
         <PageTitle title="Login" />
         <form onSubmit={handleSubmit} className="space-y-6">
-          <input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border rounded-md" />
-          <input type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-md" />
-          <button type="submit" className="w-full px-6 py-2 bg-primary text-white rounded-md text-xl font-semibold">
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <button
+            type="submit"
+            className="w-full px-6 py-2 bg-primary text-white rounded-md text-xl font-semibold"
+          >
             Login
           </button>
         </form>
+        <p className="text-center text-gray-600 dark:text-gray-400 mt-4">
+          Don’t have an account?{" "}
+          <Link
+            to="/register"
+            className="text-primary dark:text-light font-bold"
+          >
+            Register Here
+          </Link>
+        </p>
       </div>
     </div>
   );

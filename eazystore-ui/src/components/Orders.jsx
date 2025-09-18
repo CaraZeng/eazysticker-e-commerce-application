@@ -3,7 +3,7 @@ import { useLoaderData, redirect } from "react-router-dom";
 import PageTitle from "./PageTitle";
 
 export default function Orders() {
-  const orders = useLoaderData();
+  const orders = useLoaderData() || [];
 
   function formatDate(isoDate) {
     if (!isoDate) return "N/A";
