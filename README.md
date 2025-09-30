@@ -19,25 +19,6 @@ Full-stack e-commerce platform built with Spring Boot and React, featuring secur
 - Responsive UI with code splitting (<1.2s load time)
 - 99.9% uptime with automated deployment pipeline
 
-## 📂 Project Structure
-├── backend/
-│   ├── src/main/java/com/eazysticker/
-│   │   ├── controller/     # REST endpoints
-│   │   ├── service/        # Business logic
-│   │   ├── repository/     # Data access layer
-│   │   ├── security/       # JWT & Spring Security
-│   │   └── config/         # Application configuration
-│   └── src/test/          # Unit & integration tests
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Reusable React components
-│   │   ├── pages/         # Route pages
-│   │   ├── redux/         # State management
-│   │   └── api/           # API client
-│   └── public/
-└── deployment/
-├── docker/            # Docker configurations
-└── scripts/           # Deployment scripts
 ## 🔥 Code Highlights
 
 ### Backend Excellence
